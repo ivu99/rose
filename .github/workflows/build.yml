@@ -1,0 +1,63 @@
+name: Build Rose
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:  # 支持手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: windows
+            goarch: amd64
+            ext: .exe
+          - goos: windows
+            goarch: arm64
+            ext: .exe
+          - goos: linux
+            goarch: amd64
+            ext: ""
+          - goos: linux
+            goarch: arm64
+            ext: ""
+          - goos: darwin
+            goarch: amd64
+            ext: ""
+          - goos: darwin
+            goarch: arm64
+            ext: ""
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Configure Go proxy (国内加速)
+        run: |
+          go env -w GOPROXY=https://goproxy.cn,direct
+          go env -w GOSUMDB=off
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build
+        env:
+          CGO_ENABLED: 0
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          # 根据项目实际入口调整路径，常见为 . 或 ./cmd/rose
+          go build -ldflags="-s -w" -o rose-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }} .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rose-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: rose-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
