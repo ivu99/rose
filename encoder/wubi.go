@@ -72,7 +72,7 @@ func (e *WubiEncoder) initWubiData() {
 	case "wubi06", "06":
 		colIndex = 4
 	default:
-		colIndex = 2 // 默认使用86版
+		colIndex = 3 // 默认使用98版
 	}
 
 	for scanner.Scan() {
