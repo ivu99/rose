@@ -3,34 +3,11 @@ name: Build Rose
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:  # 支持手动触发
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-    fail-fast: false    # 新增这一行
-      matrix:
-        include:
-          - goos: windows
-            goarch: amd64
-            ext: .exe
-          - goos: windows
-            goarch: arm64
-            ext: .exe
-          - goos: linux
-            goarch: amd64
-            ext: ""
-          - goos: linux
-            goarch: arm64
-            ext: ""
-          - goos: darwin
-            goarch: amd64
-            ext: ""
-          - goos: darwin
-            goarch: arm64
-            ext: ""
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,25 +17,28 @@ jobs:
         with:
           go-version: 'stable'
 
-      - name: Configure Go proxy (国内加速)
+      - name: Configure Go proxy
         run: |
           go env -w GOPROXY=https://goproxy.cn,direct
           go env -w GOSUMDB=off
 
       - name: Download dependencies
-        run: go mod download
+        run: |
+          for i in 1 2 3; do
+            go mod download && break
+            echo "Retry $i..."
+            sleep 5
+          done
 
       - name: Build
         env:
           CGO_ENABLED: 0
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: |
-          # 根据项目实际入口调整路径，常见为 . 或 ./cmd/rose
-          go build -ldflags="-s -w" -o rose-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }} .
+          GOOS: darwin
+          GOARCH: amd64
+        run: go build -ldflags="-s -w" -o rose-darwin-amd64 .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rose-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: rose-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+          name: rose-darwin-amd64
+          path: rose-darwin-amd64
