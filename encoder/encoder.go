@@ -46,7 +46,7 @@ func NewEncoder(encoderType string, params map[string]any) Encoder {
 	case "pinyin", "py":
 		return NewPinyinEncoder()
 	case "wubi":
-		schema := "wubi86"
+		schema := "wubi98"
 		useAABC := false
 		var customData []byte
 		if params != nil {
