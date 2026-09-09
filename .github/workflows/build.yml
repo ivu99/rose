@@ -9,6 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+    fail-fast: false    # 新增这一行
       matrix:
         include:
           - goos: windows
