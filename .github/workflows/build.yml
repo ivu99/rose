@@ -12,6 +12,45 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ===== 新增：构建前端 =====
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: |
+          # 根据项目实际使用的包管理器选择：
+          # 如果有 pnpm-lock.yaml，用 pnpm
+          # 如果有 yarn.lock，用 yarn
+          # 如果只有 package-lock.json 或没有锁文件，用 npm
+          if [ -f pnpm-lock.yaml ]; then
+            npm install -g pnpm && pnpm install
+          elif [ -f yarn.lock ]; then
+            yarn install
+          else
+            npm install
+          fi
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: |
+          # 根据 package.json 中的 scripts 选择构建命令
+          # 常见的是 npm run build，也可能是 pnpm build
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm build
+          elif [ -f yarn.lock ]; then
+            yarn build
+          else
+            npm run build
+          fi
+
+      - name: Verify dist exists
+        run: |
+          ls -la frontend/dist/
+      # ===== 前端构建结束 =====
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
