@@ -37,7 +37,8 @@ const schemaOptions = [
 
 const needEncoder = computed(() => {
   if (!props.outputFormat) return false;
-  return props.outputFormat.kind === 2; // 五笔需要 encoder
+ // 内置五笔格式，或者自定义输出格式，都显示编码器面板
+  return props.outputFormat.kind === 2 || props.outputFormat.id === "__custom__"; 
 });
 
 // 是否显示编码器配置面板
