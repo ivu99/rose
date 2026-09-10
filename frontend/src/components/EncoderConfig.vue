@@ -22,7 +22,7 @@ const emit = defineEmits<{
   "update:config": [config: EncoderConfig | null];
 }>();
 
-const wubiSchema = ref("86");
+const wubiSchema = ref("98");
 const useAABC = ref(true);
 const codeTableFileId = ref("");
 const codeTableFilename = ref("");
